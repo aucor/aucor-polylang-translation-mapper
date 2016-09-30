@@ -64,9 +64,3 @@ $ composer aucor/aucor-polylang-translation-mapper
  * Maybe a UI to select post type and master_id
  * Show total updated instead of count for step
  * Add CLI support
-
-
-## Changelog
-
-### 0.1.0 - Github launch
- * It's working

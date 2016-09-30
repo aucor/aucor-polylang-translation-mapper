@@ -2,7 +2,7 @@
 /*
 Plugin Name: Aucor - Polylang Translation Mapper
 Plugin URI: 
-Version: 1.0
+Version: 1.1
 Author: Aucor Oy
 Author URI: http://www.aucor.fi/
 Description: Connects translations of posts with same master ID
