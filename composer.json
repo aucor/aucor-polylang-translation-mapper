@@ -1,0 +1,13 @@
+{
+	"name": "aucor/aucor-polylang-translation-mapper",
+	"description": "This is a tool that helps you connect all imported posts as translations for Polylang.",
+	"license": "GPLv2 or later",
+	"type": "wordpress-plugin",
+	"homepage": "https://github.com/aucor/aucor-polylang-translation-mapper",
+	"authors": [
+		{
+			"name": "Teemu Suoranta",
+			"email": "teemu@aucor.fi"
+		}
+	]
+}

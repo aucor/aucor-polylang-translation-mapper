@@ -34,6 +34,25 @@ How-to use:
  * Deactivate and delete plugin when you have gone through all the steps
 
 
+**Composer:**
+```
+$ composer aucor/aucor-polylang-translation-mapper
+```
+**With composer.json:**
+```
+{
+  "require": {
+    "aucor/aucor-polylang-translation-mapper": "*"
+  },
+  "extra": {
+    "installer-paths": {
+      "htdocs/wp-content/plugins/{$name}/": ["type:wordpress-plugin"]
+    }
+  }
+}
+```
+
+
 ## Issues and feature whishlist
 
 **Issues:**
@@ -44,6 +63,7 @@ How-to use:
 
  * Maybe a UI to select post type and master_id
  * Show total updated instead of count for step
+ * Add CLI support
 
 
 ## Changelog
