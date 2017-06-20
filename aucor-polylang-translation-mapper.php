@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Aucor - Polylang Translation Mapper
-Plugin URI: 
+Plugin URI:
 Version: 1.1
 Author: Aucor Oy
 Author URI: http://www.aucor.fi/
@@ -23,6 +23,9 @@ class AucorTranslationMapper {
 	private $plugin_slug;
 	private $post_type;    // edit me below
 	private $meta_key;     // edit me below
+	private $taxonomy;
+
+	private $query_type;
 
 	/**
 	 * Constructor
@@ -35,6 +38,9 @@ class AucorTranslationMapper {
 
 		$this->post_type = 'post'; // post type
 		$this->meta_key = 'master_id'; // "master id" that all translations share
+		$this->taxonomy = 'post_translations'; // taxonomy that has a term which all translations share
+
+		$this->query_type = 'meta_query'; // choose which method to use to map posts. "meta_query" or "tax_query".
 
 		$this->updated = 0;
 		$this->ignored = 0;
@@ -60,40 +66,61 @@ class AucorTranslationMapper {
 
 			$paged = ($_GET[ $this->plugin_slug . '-p' ]) ? $_GET[ $this->plugin_slug . '-p' ] : 1; // Paged because running too many posts at a time causes memory overflow
 
-			$args = array( 
+			$args = array(
 				'post_type' => $this->post_type,
 				'posts_per_page' => 50, // Make me less if PHP can't handle it
 				'paged' => $paged,
 				'orderby' => 'title',
 				'order' => 'DESC',
 				'lang' => '',
-				'post_status' => 'any',
+				'post_status' => 'any'
+			);
+
+			$args[$this->query_type] = array(
+				'tax_query' => array(
+					array(
+						'taxonomy' => $this->taxonomy,
+						'operator' => 'EXISTS'
+					)
+				),
 				'meta_query' => array(
 					array(
 						'key' => $this->meta_key,
 						'compare' => 'EXISTS'
 					),
 				)
-			);
+			)[$this->query_type];
 
 			$query = new WP_Query( $args );
 			$max_num_pages = $query->max_num_pages;
 
 			while ( $query->have_posts() ) : $query->the_post();
 
-				$master_id = get_post_meta( $query->post->ID, $this->meta_key, true );
+				$master_id = array(
+				                'meta_query' => get_post_meta( $query->post->ID, $this->meta_key, true ),
+				                'tax_query' => get_the_terms( $query->post->ID, $this->taxonomy )[0]->term_id
+				            )[$this->query_type];
 				$translations = pll_get_post_translations( $query->post->ID );
 
 				if(in_array($master_id, $used_master_ids)) {
 					continue; // already linked, skip
 				}
 
-				$args_sub = array( 
+				$args_sub = array(
 					'post_type' => $this->post_type,
 					'posts_per_page' => -1,
 					'no_found_rows' => true,
 					'lang' => '',
-					'post_status' => 'any',
+					'post_status' => 'any'
+				);
+
+				$args_sub[$this->query_type] = array(
+					'tax_query' => array(
+						array(
+							'taxonomy' => $this->taxonomy,
+							'terms' => $master_id
+						),
+					),
 					'meta_query' => array(
 						array(
 							'key' => $this->meta_key,
@@ -101,7 +128,8 @@ class AucorTranslationMapper {
 							'value' => $master_id
 						),
 					)
-				);
+				)[$this->query_type];
+
 				$sub_query = new WP_Query( $args_sub );
 				while ( $sub_query->have_posts() ) : $sub_query->the_post();
 
@@ -137,9 +165,9 @@ class AucorTranslationMapper {
 			$full_url = "//$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 			$full_url .= (strpos($full_url, '?') === false) ? '?' : '&';
 			$full_url .= $this->plugin_slug . '=start&' . $this->plugin_slug . '-p=1';
-			
+
 			$this->admin_notice = '<p>Post type: <b>' . $this->post_type . '</b><br />';
-			$this->admin_notice .= 'Master meta key: <b>' . $this->meta_key . '</b></p>';
+			$this->admin_notice .= ($this->query_type === 'meta_query') ? 'Master meta key: <b>' . $this->meta_key . '</b></p>' : 'Translation taxonomy: <b>' . $this->taxonomy . '</b></p>';
 			$this->admin_notice .= '<p>Take a backup of your database. There is no return.</p>';
 			$this->admin_notice .= '<a class="button" href="' . $full_url . '">Start connecting translations</a>';
 
