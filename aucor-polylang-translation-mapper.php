@@ -1,10 +1,10 @@
 <?php
 /*
-Plugin Name: Aucor - Polylang Translation Mapper
-Plugin URI:
-Version: 1.1
+Plugin Name: Polylang Translation Mapper
+Plugin URI: https://github.com/aucor/aucor-polylang-translation-mapper/
+Version: 1.2
 Author: Aucor Oy
-Author URI: http://www.aucor.fi/
+Author URI: https://www.aucor.fi/
 Description: Connects translations of posts with same master ID
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -190,4 +190,8 @@ class AucorTranslationMapper {
 
 }
 
-add_action('plugins_loaded', create_function('', 'global $aucor_translation_mapper; $aucor_translation_mapper = new AucorTranslationMapper();'));
+add_action('plugins_loaded', function() {
+	global $aucor_translation_mapper;
+	$aucor_translation_mapper = new AucorTranslationMapper();
+});
+
